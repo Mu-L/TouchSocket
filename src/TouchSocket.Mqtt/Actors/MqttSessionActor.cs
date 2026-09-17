@@ -119,6 +119,7 @@ public class MqttSessionActor : MqttActor
     /// </summary>
     public async Task Deactivate()
     {
+        this.Online = false;
         Interlocked.Exchange(ref this.m_offlineTicksUtc, DateTimeOffset.UtcNow.UtcTicks);
         this.m_asyncResetEvent.Reset();
         var willMessage = this.m_mqttWillMessage;
@@ -234,6 +235,7 @@ public class MqttSessionActor : MqttActor
 
         if (mqttConnAckMessage.ReturnCode != MqttReasonCode.ConnectionAccepted)
         {
+            this.Online = false;
             await this.ProtectedOutputSendAsync(mqttConnAckMessage, cancellationToken).ConfigureDefaultAwait();
             return;
         }

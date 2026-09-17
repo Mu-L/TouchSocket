@@ -23,7 +23,8 @@ public sealed class McpAIFunction : AIFunction
 {
     private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web)
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        TypeInfoResolver = McpJsonSerializerContext.Default
     };
 
     private readonly IMcpClient m_client;

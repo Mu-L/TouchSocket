@@ -58,11 +58,15 @@ public sealed class MqttClientActor : MqttActor
     /// <returns>连接确认消息。</returns>
     public async Task<MqttConnAckMessage> ConnectAsync(MqttConnectMessage message, CancellationToken cancellationToken)
     {
+        this.Online = false;
         this.m_waitForConnect = new TaskCompletionSource<MqttConnAckMessage>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         await this.ProtectedOutputSendAsync(message, cancellationToken).ConfigureDefaultAwait();
         var connAckMessage = await this.m_waitForConnect.Task.WithCancellation(cancellationToken);
-        this.Online = true;
+        if (connAckMessage.ReturnCode == MqttReasonCode.ConnectionAccepted)
+        {
+            this.Online = true;
+        }
         return connAckMessage;
     }
 

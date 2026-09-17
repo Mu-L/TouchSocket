@@ -148,6 +148,15 @@ internal class MqttWebSocketSessionClient : RoomDependencyObject, IMqttWebSocket
         await this.PluginManager.RaiseIMqttReceivingPluginAsync(this.Resolver, this, new MqttReceivingEventArgs(mqttMessage)).ConfigureDefaultAwait();
 
         await this.m_mqttActor.InputMqttMessageAsync(mqttMessage, CancellationToken.None).ConfigureDefaultAwait();
+
+        if (mqttMessage is MqttConnectMessage && !this.m_mqttActor.Online)
+        {
+            _ = Task.Run(async () =>
+            {
+                await Task.Yield();
+                await this.m_client.CloseAsync("Mqtt连接被拒绝").ConfigureDefaultAwait();
+            });
+        }
     }
 
     #region MqttActor

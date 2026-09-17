@@ -72,7 +72,7 @@ public abstract partial class HttpSessionClient : TcpSessionClientBase, IHttpSes
         }
         try
         {
-            await this.HttpPipelineLoopAsync(transport.Reader, transport.ClosedToken).ConfigureDefaultAwait();
+            await this.HttpPipelineLoopAsync(transport, transport.ClosedToken).ConfigureDefaultAwait();
         }
         finally
         {
@@ -91,8 +91,10 @@ public abstract partial class HttpSessionClient : TcpSessionClientBase, IHttpSes
         }
     }
 
-    private async Task HttpPipelineLoopAsync(PipeReader reader, CancellationToken closedToken)
+    private async Task HttpPipelineLoopAsync(ITransport transport, CancellationToken closedToken)
     {
+        var reader = transport.Reader;
+
         // 检测是否为 HTTP/2 明文连接（h2c）
         if (await this.TryHandleHttp2ConnectionAsync(reader, closedToken).ConfigureDefaultAwait())
         {
@@ -216,6 +218,7 @@ public abstract partial class HttpSessionClient : TcpSessionClientBase, IHttpSes
             // 阶段四：若请求不保持连接，断开连接
             if (!this.m_requestRoot.KeepAlive)
             {
+                await transport.CompleteSendAsync(closedToken).ConfigureDefaultAwait();
                 return;
             }
         }

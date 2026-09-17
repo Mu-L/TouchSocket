@@ -89,6 +89,20 @@ internal abstract class BaseTransport : SafetyDisposableObject, ITransport
     /// </summary>
     public virtual PipeWriter Writer => this.m_pipeSend.Writer;
 
+    /// <inheritdoc/>
+    public virtual async Task CompleteSendAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            this.m_pipeSend.Writer.Complete();
+        }
+        catch
+        {
+        }
+
+        await this.m_sendTask.WithCancellation(cancellationToken).ConfigureDefaultAwait();
+    }
+
     public virtual async Task<Result> CloseAsync(string msg, CancellationToken cancellationToken = default)
     {
         try

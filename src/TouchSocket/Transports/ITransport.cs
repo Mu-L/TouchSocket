@@ -21,4 +21,9 @@ public interface ITransport : ITransportReader, ITransportWriter, IClosableClien
     /// 获取连接关闭时的事件参数。
     /// </summary>
     ClosedEventArgs ClosedEventArgs { get; }
+
+    /// <summary>
+    /// 完成发送队列并等待发送任务自然结束。
+    /// </summary>
+    Task CompleteSendAsync(CancellationToken cancellationToken = default);
 }

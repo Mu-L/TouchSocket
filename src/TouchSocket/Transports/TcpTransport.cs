@@ -153,15 +153,23 @@ internal sealed class TcpTransport : BaseTransport
             {
                 if (socket.Connected)
                 {
-                    socket.Shutdown(SocketShutdown.Both);
+                    socket.LingerState = new LingerOption(true, 1);
+                    socket.Shutdown(SocketShutdown.Send);
                 }
             }
-            catch (Exception)
+            catch
             {
-                // Socket已经断开或未连接,忽略此异常
             }
-            socket.Close(0);
-            return Result.Success;
+
+            try
+            {
+                socket.Close(1000);
+                return Result.Success;
+            }
+            catch (Exception ex)
+            {
+                return Result.FromException(ex);
+            }
         }
         catch (Exception ex)
         {

@@ -250,6 +250,17 @@ public sealed class McpCallToolParams
 }
 
 /// <summary>
+/// 表示可由 MCP 工具执行器识别成功状态的业务结果。
+/// </summary>
+public interface IMcpToolResult
+{
+    /// <summary>
+    /// 获取一个值，指示业务操作是否成功。
+    /// </summary>
+    bool IsSuccess { get; }
+}
+
+/// <summary>
 /// 表示 tools/call 的响应结果。
 /// </summary>
 public sealed class McpCallToolResult

@@ -157,6 +157,15 @@ public class MqttTcpSessionClient : TcpSessionClientBase, IMqttTcpSessionClient
             await this.PluginManager.RaiseIMqttReceivingPluginAsync(this.Resolver, this, new MqttReceivingEventArgs(mqttMessage)).ConfigureDefaultAwait();
 
             await this.m_mqttActor.InputMqttMessageAsync(mqttMessage, CancellationToken.None).ConfigureDefaultAwait();
+            //issue:https://github.com/RRQM/TouchSocket/issues/143
+            if (mqttMessage is MqttConnectMessage && !this.m_mqttActor.Online)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await Task.Yield();
+                    await this.CloseAsync("Mqtt连接被拒绝").ConfigureDefaultAwait();
+                });
+            }
         }
         await base.OnTcpReceived(e).ConfigureDefaultAwait();
     }

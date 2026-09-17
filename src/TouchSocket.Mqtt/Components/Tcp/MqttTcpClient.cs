@@ -129,6 +129,11 @@ public class MqttTcpClient : TcpClientBase, IMqttTcpClient
             var connAckMessage = await this.m_mqttActor.ConnectAsync(connectMessage, cancellationToken).ConfigureDefaultAwait();
             if (connAckMessage.ReturnCode != MqttReasonCode.ConnectionAccepted)
             {
+                _ = Task.Run(async () =>
+                {
+                    await Task.Yield();
+                    await this.CloseAsync($"Connection failed with reason: {connAckMessage.ReturnCode}，reasonString: {connAckMessage.ReasonString}").ConfigureDefaultAwait();
+                });
                 ThrowHelper.ThrowException($"Connection failed with reason: {connAckMessage.ReturnCode}，reasonString: {connAckMessage.ReasonString}");
             }
             await this.PluginManager.RaiseIMqttConnectedPluginAsync(this.Resolver, this, new MqttConnectedEventArgs(connectMessage, connAckMessage)).ConfigureDefaultAwait();

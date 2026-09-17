@@ -864,12 +864,12 @@ public sealed class McpActor : DisposableObject
             };
         }
 
-        return new McpCallToolResult
+        var result = new McpCallToolResult
         {
-            IsError = false,
-            Content = new List<McpContent> { new McpTextContent { Text = SerializeMcpValue(value) } },
+            IsError = value is IMcpToolResult businessResult && !businessResult.IsSuccess,
             StructuredContent = CreateStructuredContent(value, this.m_options.JsonSerializerOptions)
         };
+        return result;
     }
 
     private static JsonElement? CreateStructuredContent(object value, JsonSerializerOptions jsonSerializerOptions)
